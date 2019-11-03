@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+            <div class="card card-signin my-5">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Faculty Registration</h5>
+                    <form class="form-signin" action="" method="POST">
+                        {{ form.hidden_tag() }}
+                        <div class="form-label-group">
+                            {% if form.name.errors %}
+                                {{ form.name(class="form-control is-invalid", placeholder="Name") }}
+                                    <div class="invalid-feedback">
+                                        {%  for error in form.name.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                            
+                            {% else %}
+                                {{ form.name(class="form-control", placeholder="Name") }}
+                            {% endif %}
+                            {{ form.name.label(for="name") }}
+                        </div>
+                        <div class="form-label-group">
+                            {% if form.designation.errors %}
+                                {{ form.designation(class="form-control is-invalid", placeholder="Name") }}
+                                    <div class="invalid-feedback">
+                                        {%  for error in form.designation.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                            {% else %}
+                                {{ form.designation(class="form-control", placeholder="Designation") }}
+                            {% endif %}
+                            {{ form.designation.label(for="designation") }}
+                        </div>
+                        <div class="form-label-group">
+                            {% if form.email.errors %}
+                                {{ form.email(class="form-control is-invalid", placeholder="Email") }}
+                                    <div class="invalid-feedback">
+                                        {%  for error in form.email.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                            {% else %}    
+                                {{ form.email(class="form-control", placeholder="Email") }}
+                            {% endif %}
+                            {{ form.email.label(for="email") }}
+                        </div>
+                        <div class="form-label-group">
+                            {% if form.password.errors %}
+                                {{ form.password(class="form-control is-invalid", placeholder="Password") }}
+                                    <div class="invalid-feedback">
+                                        {%  for error in form.password.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                            {% else %}
+                                {{ form.password(class="form-control", placeholder="Password") }}
+                            {% endif %}
+                            {{ form.password.label(for="password") }}
+                        </div>
+                        <div class="form-label-group">
+                            {% if form.cnf_password.errors %}
+                                {{ form.cnf_password(class="form-control is-invalid", placeholder="Confirm Password") }}
+                                    <div class="invalid-feedback">
+                                        {%  for error in form.password.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                            {% else %}
+                                {{ form.cnf_password(class="form-control", placeholder="Confirm Password") }}
+                            {% endif %}
+                            {{ form.cnf_password.label(for="cnf_password") }}
+                        </div>
+
+                        <hr class="mx-5">
+                        {{ form.submit(class="btn btn-lg btn-primary btn-block text-uppercase") }}
+                    </form>
+                    <p class="text-center mt-4">Already registered? Sign in <a href="{{ url_for('index') }}">here<a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
