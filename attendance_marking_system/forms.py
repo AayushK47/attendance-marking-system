@@ -30,3 +30,10 @@ class AttendanceForm(FlaskForm):
     date = DateField('Date', validators=[ DataRequired() ])
     image = FileField('Select an Image', validators=[ FileRequired(message='Please select a valid image') ])
     submit = SubmitField('Submit')
+
+class StudentForm(FlaskForm):
+    enrollment = StringField('Enrollment number', validators=[ DataRequired(message="Please enter your student enrollment number") ])
+    name = StringField('Name', validators=[ DataRequired(message="Please enter student name") ])
+    class_name = SelectField('Lecture Name', description='Lecture Name', choices=[], coerce=str)
+    image = FileField('Select an Image', validators=[ FileRequired(message='Please select a valid image') ])
+    submit = SubmitField('Add Student')

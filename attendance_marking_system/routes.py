@@ -13,7 +13,7 @@ from werkzeug.utils import secure_filename
 
 from attendance_marking_system import app
 from attendance_marking_system.detect import detect_faces, extract_faces
-from attendance_marking_system.forms import LoginForm, RegisterForm, AttendanceForm
+from attendance_marking_system.forms import LoginForm, RegisterForm, AttendanceForm, StudentForm
 from attendance_marking_system import cursor, conn
 from attendance_marking_system.auth import User
 
@@ -54,7 +54,7 @@ def register():
 
 def add_user(form):
     hashed_pw = str(bcrypt.hashpw(form.password.data.encode('utf-8'), bcrypt.gensalt()), 'utf-8')
-    sql = "INSERT INTO tbl_faculty (name, designation, email, password) VALUES (%s, %s, %s, %s, %s);"
+    sql = "INSERT INTO tbl_faculty (name, designation, email, password) VALUES (%s, %s, %s, %s);"
     val = (form.name.data, form.designation.data, form.email.data, hashed_pw)
     cursor.execute(sql, val)
     conn.commit()
@@ -68,16 +68,25 @@ def attendance():
 
     if request.method == 'POST':
         getFileData(attendance_form)
-        mark_attendance()
-        # insert_lecture_data(attendance_form, image)
-        # image = b64encode(image).decode("utf-8")
-        # get_present_students(faces)
-        # attendance_form.class_name.choices = get_choices()
-        return render_template('attendance.html', form=attendance_form, auth=current_user.is_authenticated, image=None, tbl=True)
+        present, present_final, image = mark_attendance()
+        insert_lecture_data(attendance_form, image)
+        image = b64encode(image).decode("utf-8")
+        attendance_form.class_name.choices = get_choices()
+        query = 'INSERT INTO tbl_attendance (lecture_no, _date, enrollment_no, class) VALUES '
+        values = ''
+        print(present_final)
+        for i in present_final:
+            vals = f"('{attendance_form.lecture_number.data}', '{attendance_form.date.data}', '{i[0].decode()}', '{attendance_form.class_name.data}'), "
+            values += vals
+
+        values = values[:-2] + ';'
+        cursor.execute(query + values)
+        conn.commit()
+        return render_template('attendance.html', active='attendance', form=attendance_form, auth=current_user.is_authenticated, image=image, tbl=present_final, styles=None)
 
 
     attendance_form.class_name.choices = get_choices()
-    return render_template('attendance.html', form=attendance_form, auth=current_user.is_authenticated, image=None, tbl=False)
+    return render_template('attendance.html', active='attendance', form=attendance_form, auth=current_user.is_authenticated, image=None, tbl=False)
 
 def get_choices():
     data = cursor.execute("SELECT name FROM tbl_class")
@@ -101,9 +110,7 @@ def insert_lecture_data(form, image):
     print('lecture data inserted')
 
 def mark_attendance():
-    # List of all students present
     present = []
-    # get all the faces in the image
     img1 = cv2.imread(os.path.join(os.getcwd(), 'img-1.jpg'))
     face_dims, faces = extract_faces(cv2.cvtColor(img1, cv2.COLOR_BGR2GRAY), img1)
     count = len(faces)
@@ -116,16 +123,16 @@ def mark_attendance():
     index = 0
     for face in faces:
         prl = len(present)
-        cv2.imwrite('img-1.jpg', face)
+        cv2.imwrite('img-2.jpg', face)
 
         for enroll, image in data:
             if enroll in present:
                 continue
-            filename = 'img-2.jpg'
+            filename = 'img-3.jpg'
             with open(filename, 'wb') as f:
                 f.write(image)
-        
-            os.system(f'python predict.py img-1.jpg {filename}')
+            img = cv2.imread(filename)
+            os.system(f'python predict.py img-2.jpg {filename}')
             with open('results.txt', 'r') as f:
                 result = f.read()
             print(f'result {result}')
@@ -138,12 +145,43 @@ def mark_attendance():
         
         x, y, w, h = face_dims[index]
         cv2.rectangle(img1, (x, y), (x+w, y+h), (0, 0, 255), 5)
-        cv2.putText(img1, f'{present[-1]}', (x+10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
+        name = 'unknown' if present[-1] == 'unknown' else present[-1].decode()
+        cv2.putText(img1, f'{name}', (x+10, y+30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 0), 2)
         index += 1
-        print(present)
     
     cv2.imwrite('img-1.jpg', img1)
+    with open('img-1.jpg', 'rb') as f:
+        image_raw = f.read()
+    
+    os.remove('results.txt')
 
+    cursor_raw = conn.cursor(raw=True)
+    cursor_raw.execute('SELECT enrollment_no, name FROM tbl_student')
+    data = cursor_raw.fetchall()
+
+    present_final = []
+    for i in data:
+        if i[0] in present:
+            present_final.append(i)
+
+    os.remove('img-3.jpg')
+    os.remove('img-2.jpg')
+    os.remove('img-1.jpg')
+
+    return present, present_final, image_raw
+
+@app.route('/history')
+def history():
+    params = dict(request.args)
+    if len(params) == 0:
+        cursor.execute(f"SELECT * FROM tbl_lecture WHERE teacher='{current_user.id}'")
+        data = cursor.fetchall()
+        return render_template('history.html', active='history', auth=current_user.is_authenticated, history=data)
+    else:
+        cursor.execute(f"SELECT tbl_attendance.enrollment_no, name FROM tbl_attendance INNER JOIN tbl_student ON tbl_attendance.enrollment_no=tbl_student.enrollment_no WHERE lecture_no='{params['lec']}' AND tbl_attendance.class='{params['class']}' AND _date='{params['date']}'")
+        data = cursor.fetchall()
+        print(data)
+        return render_template('detail.html', active='history', auth=current_user.is_authenticated, params=params, details=data)
 
 @app.route('/logout')
 def logout():

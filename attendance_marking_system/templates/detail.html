@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="card m-5 p-2">
+            <div class="body">
+                <h1 class="text-center mt-3 mb-5">Attendance - {{ params['date'] }} - {{ params['class'] }} - {{ params['lec'] }}</h1>
+                <table class="table table-striped mt-5">
+                    <thead>
+                        <th>Enrollment Number</th>
+                        <th>Name</th>
+                    </thead>
+                    {% for detail in  details %}
+                    <tr>
+                            <td>{{ detail[0] }}</td>
+                            <td>{{ detail[0] }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

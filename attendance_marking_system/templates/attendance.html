@@ -16,17 +16,14 @@
                     </div>
                     <div class="form-group mb-2 ml-1 mr-1">
                         {{ form.date.label(class='sr-only') }}
-                        <!-- <label for="date" class="sr-only">Date</label> -->
+
                         {{ form.date(class='form-control', placeholder='Date') }}
-                        <!-- <input name="date" type="date" class="form-control" value="Date" placeholder="Date"> -->
                     </div>
+                    
                     <div class="form-group mb-2 ml-1 mr-1">
-                        <button id="button" type="button" class="btn btn-primary">Select an image</button>
-                        {{ form.image(id='fileInput', class='d-none') }}
-                        <!-- <input id="fileInput" name="img" class="d-none" type="file" /> -->
+                        {{ form.image() }}
                     </div>
                     {{ form.submit(class="btn btn-primary mb-2 ml-1") }}
-                    <!-- <button type="submit" class="btn btn-primary mb-2 ml-1">Submit</button> -->
                 </form>
                 {% if tbl %}
                 <div class="result">
@@ -37,30 +34,15 @@
                         <div class="caption text-center"><b>Class Attendance</b></div>
                         <table class="table table-striped mt-5">
                             <thead>
-                                <th>#</th>
                                 <th>Enrollment Number</th>
                                 <th>Student Name</th>
                             </thead>
-                            <tr>
-                                <td>1</td>
-                                <td>0187CS161001</td>
-                                <td>Aayush Kurup</td>
-                            </tr>
-                            <tr>
-                                <td>2</td>
-                                <td>0187CS161041</td>
-                                <td>Harshal Geete</td>
-                            </tr>
-                            <tr>
-                                <td>3</td>
-                                <td>0187CS161044</td>
-                                <td>Kapil Nema</td>
-                            </tr>
-                            <tr>
-                                <td>4</td>
-                                <td>0187CS161061</td>
-                                <td>Muskan Jain</td>
-                            </tr>
+                            {% for row in tbl %}
+                                <tr>
+                                    <td>{{ row[0].decode() }}</td>
+                                    <td>{{ row[1].decode() }}</td>
+                                </tr>
+                            {% endfor %}    
                         </table>
                     </div>
                 </div>
@@ -68,14 +50,14 @@
             </div>
         </div>
     </div>
-    <footer class="page-footer font-small bg-light mt-5">
-        <div class="footer-copyright text-center pt-2">Created with &hearts; by:
+    <footer style = 'position: fixed; bottom: 0; width: 100%; border-top-color: #212529;' class=" footer font-small bg-light">
+        <div class="text-center pt-2">Created with &hearts; by:
             <a href="">Kapil</a>
             <a href="">Muskan</a>
             <a href="">Aayush</a> &
             <a href="">Harshal</a>
             
         </div>
-        <div class="footer-copyright text-center py-2">&copy Copyright 2019 
+        <div class="text-center py-2">&copy Copyright 2019 
     </footer>
 {% endblock content %}
